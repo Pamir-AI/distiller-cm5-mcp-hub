@@ -1,0 +1,3 @@
+[submodule "projects/playwright-plus-python-mcp"]
+	path = projects/playwright-plus-python-mcp
+	url = https://github.com/Pamir-AI/playwright-python-mcp.git
