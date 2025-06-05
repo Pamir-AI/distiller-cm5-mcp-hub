@@ -1,0 +1,73 @@
+# MCP Hub Rewrite - Product Requirements Document
+
+## Project Overview
+Simplify the MCP (Model Context Protocol) Hub application by streamlining both frontend and backend components to focus on core functionality: MCP discovery, server management, and tool testing.
+
+## Current State
+The application currently has a complex UI with multiple features including project creation, deployment services, and dependency management. The goal is to simplify and focus on the core MCP management workflow.
+
+## Key Requirements
+
+### 1. Left Panel - MCP Discovery
+- **Automatic MCP Detection**: Scan the `projects/` folder to automatically detect available MCPs
+- **Clean Interface**: Remove unnecessary buttons (new project, deploy service)
+- **Dependency Management**: Keep install dependency button with visual indicators
+  - Show installation status (installed/not installed)
+  - Prevent redundant installations
+- **MCP List Display**: Show all detected MCPs in a clean, selectable list format
+
+### 2. Right Panel - Tool Management
+- **Server Lifecycle**: Automatically spin up MCP server when an MCP is selected
+- **Protocol Support**: Support both stdio and HTTP protocols for tool discovery
+- **Tool Listing**: Display all available tools from the selected MCP
+- **Real-time Updates**: Update tool list when server state changes
+
+### 3. Tool Testing Interface
+- **Individual Tool Testing**: Enable testing of each tool separately
+- **Error Handling**: Display error logs in a dedicated terminal tab
+- **Test Results**: Show tool execution results and responses
+- **Interactive Parameters**: Allow input of tool parameters for testing
+
+### 4. Backend Simplification
+- **API Streamlining**: Simplify API endpoints to focus on core functionality
+- **Service Management**: Efficient MCP server management and lifecycle
+- **Protocol Handling**: Robust stdio/HTTP protocol communication
+- **Error Management**: Comprehensive error logging and reporting
+
+### 5. Frontend Simplification
+- **Two-Panel Layout**: Clean left-right panel design
+- **Responsive UI**: Modern, intuitive interface
+- **Real-time Updates**: Live status updates and feedback
+- **Terminal Integration**: Built-in terminal for logs and debugging
+
+## Technical Architecture
+
+### Frontend
+- Simplified HTML/CSS/JavaScript structure
+- Two-panel responsive layout
+- WebSocket connections for real-time updates
+- Terminal component for log display
+
+### Backend
+- Streamlined Flask API
+- MCP server management service
+- Protocol abstraction layer (stdio/HTTP)
+- Logging and error handling service
+
+### Data Flow
+1. Frontend scans projects folder → displays MCP list
+2. User selects MCP → backend starts server
+3. Backend discovers tools → frontend displays tool list
+4. User tests tool → backend executes → frontend shows results
+
+## Success Metrics
+- Simplified user workflow (3 steps max to test a tool)
+- Reduced UI complexity (50% fewer UI elements)
+- Improved reliability (automatic dependency status detection)
+- Better debugging experience (integrated terminal logs)
+
+## Out of Scope
+- Advanced project management features
+- Complex deployment workflows
+- Multi-user support
+- Advanced configuration management 

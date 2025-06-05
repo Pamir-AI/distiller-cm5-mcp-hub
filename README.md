@@ -1,93 +1,94 @@
- # Raspberry Pi 5 MCP-Server Development Platform
+# MCP Hub - Simplified
 
-A comprehensive web application for rapid creation, debugging, and deployment of MCP-Server services on Raspberry Pi 5.
+A streamlined **Model Context Protocol (MCP)** server management and testing interface.
 
-## Features
+## 🚀 Quick Start
 
-- **Project Management**: Create and manage MCP-Server projects using uv
-- **Script Upload**: Upload and integrate MCP scripts
-- **Dependency Management**: Automated Python dependency installation
-- **Debug & Test**: Integrated MCP-Inspector functionality
-- **One-Click Deploy**: Launch services with network access
-
-## Tech Stack
-
-- **Backend**: FastAPI + Uvicorn
-- **Frontend**: HTML5 + CSS3 + Vanilla JavaScript
-- **Package Management**: uv toolkit
-- **Process Management**: subprocess + asyncio
-- **File Operations**: pathlib + async IO
-
-## Quick Start
-
-1. **Installation**:
-   ```bash
-   cd mcp_dev_platform
-   pip install -r requirements.txt
-   ```
-
-2. **Run Development Server**:
-   ```bash
-   python main.py
-   ```
-
-3. **Access Web Interface**:
-   Open `http://localhost:8000` in your browser
-
-## Directory Structure
-
-```
-mcp_dev_platform/
-├── main.py                 # Application entry point
-├── requirements.txt        # Python dependencies
-├── config/
-│   ├── settings.py        # Application configuration
-│   └── systemd/           # Service deployment configs
-├── backend/
-│   ├── __init__.py
-│   ├── api/               # FastAPI routes
-│   ├── services/          # Business logic
-│   ├── models/            # Data models
-│   └── utils/             # Utility functions
-├── frontend/
-│   ├── static/            # CSS, JS, images
-│   └── templates/         # HTML templates
-├── projects/              # MCP projects workspace
-└── logs/                  # Application logs
-```
-
-## API Endpoints
-
-- `POST /api/projects` - Create new project
-- `POST /api/projects/{id}/upload` - Upload MCP script
-- `POST /api/projects/{id}/install` - Install dependencies
-- `POST /api/projects/{id}/debug` - Start debug session
-- `POST /api/projects/{id}/deploy` - Deploy service
-- `GET /api/projects/{id}/status` - Get project status
-- `GET /api/projects/{id}/logs` - Get service logs
-
-## Deployment
-
-### Systemd Service
+### 1. Install Dependencies
 ```bash
-sudo cp config/systemd/mcp-dev-platform.service /etc/systemd/system/
-sudo systemctl enable mcp-dev-platform
-sudo systemctl start mcp-dev-platform
+uv pip install -r requirements.txt
 ```
 
-### Development Mode
+### 2. Start MCP Hub
 ```bash
-python main.py --dev
+python start_mcp_hub.py
 ```
 
-## Usage Workflow
+### 3. Open in Browser
+- **Frontend UI**: http://localhost:3000/templates/
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
 
-1. **Create Project**: Input service name and click "Create Project"
-2. **Upload Script**: Upload your MCP script files
-3. **Install Dependencies**: Automatically detect and install requirements
-4. **Debug & Test**: Use integrated MCP-Inspector to test tools
-5. **Deploy**: One-click deployment with network access
+## 💡 How to Use
 
-## License
+1. **Discover MCPs**: The system automatically scans the `projects/` folder for MCP servers
+2. **Select MCP**: Click on an MCP in the left panel to start its server
+3. **Browse Tools**: View available tools in the right panel
+4. **Test Tools**: Use the form interface to test tools with parameters
 
-MIT License
+## 📁 Project Structure
+
+```
+├── projects/                    # MCP servers auto-discovered here
+│   ├── google_workspace_mcp/   # Example: Google Workspace MCP
+│   └── playwright-plus-python-mcp/  # Example: Playwright MCP
+├── backend/                    # Backend API services
+│   ├── api/                   # API endpoints
+│   ├── services/             # Core services (discovery, server management)
+│   └── main_simplified.py   # Main backend application
+├── frontend/                  # Static frontend files
+│   └── templates/            # HTML templates
+├── main.py                   # Backend entry point
+└── start_mcp_hub.py         # Complete startup script
+```
+
+## 🔧 Manual Startup (Alternative)
+
+If you prefer to start services manually:
+
+```bash
+# Start backend only
+python main.py
+
+# Start frontend only (in another terminal)
+cd frontend && python -m http.server 3000
+```
+
+## 🛠️ Development
+
+### Adding New MCPs
+1. Place MCP project in `projects/` folder
+2. Ensure it has proper `pyproject.toml` or `requirements.txt`
+3. MCP Hub will auto-discover it on next startup
+
+### API Endpoints
+- `GET /api/mcp/list` - List all discovered MCPs
+- `POST /api/mcp/{id}/start` - Start an MCP server
+- `GET /api/mcp/{id}/tools` - Get available tools
+- `POST /api/mcp/{id}/tools/{tool}/call` - Execute a tool
+
+## 🔍 Troubleshooting
+
+**MCP not discovered?**
+- Check `projects/` folder structure
+- Ensure MCP has `pyproject.toml` or entry point file
+- Look for virtual environment in `.venv/`
+
+**Server won't start?**
+- Check if ports 8000/3000 are available
+- Verify dependencies are installed
+- Check console output for specific errors
+
+**Tools not loading?**
+- Ensure MCP server started successfully
+- Check MCP server logs in terminal
+- Verify MCP implements tool discovery properly
+
+## 🎯 Features
+
+- ✅ **Auto-discovery** of MCP servers in projects/ folder
+- ✅ **Automatic server management** (start/stop/restart)
+- ✅ **Tool discovery** from running MCP servers
+- ✅ **Interactive testing** interface with form generation
+- ✅ **Real-time status** updates and error handling
+- ✅ **Support for both** stdio and HTTP MCP protocols
