@@ -1,16 +1,14 @@
 # Speaker MCP Server
 
-Text-to-Speech functionality using the Piper library for the Distiller CM5 platform.
+Text-to-Speech functionality using the Piper library for the Distiller CM5 platform. This MCP (Model Context Protocol) server provides real-time speech synthesis capabilities through streaming audio playback.
 
 ## Features
 
-- **Text-to-Speech Generation**: Convert text to high-quality speech using Piper TTS
-- **Audio File Management**: Save generated speech as WAV files with automatic naming
-- **Direct Playback**: Stream speech directly to speakers without saving files
-- **File Management**: List, track, and clean up generated TTS files
-- **Model Information**: Check available TTS models and service status
-- **Volume Control**: Adjust playback volume levels
-- **Sound Card Selection**: Choose specific audio output devices
+- **Real-time Text-to-Speech**: Convert text to speech with immediate streaming playback
+- **Volume Control**: Adjustable playback volume levels (0-100)
+- **Service Health Monitoring**: Check TTS service status and configuration
+- **Multiple Transport Protocols**: Support for stdio, SSE, and HTTP transports
+- **Graceful Error Handling**: Robust error handling with detailed feedback
 
 ## Installation
 
@@ -26,170 +24,195 @@ Text-to-Speech functionality using the Piper library for the Distiller CM5 platf
 ### Run the MCP Server
 
 ```bash
-# Using UV with entry point
+# Using UV with entry point (default stdio transport)
 uv run distiller-cm5-speaker-mcp
 
-# Or directly
+# Or directly with Python
 uv run python server.py
 ```
 
 ### Alternative Transport Methods
 
 ```bash
-# SSE transport
+# SSE transport for web applications
 uv run python server.py --transport sse --host localhost --port 3000
 
-# HTTP transport  
+# HTTP transport for REST-like interfaces
 uv run python server.py --transport streamable-http --host localhost --port 3000
 ```
 
 ## Available Tools
 
 ### 1. `text_to_speech`
-Convert text to speech and optionally save as WAV file.
+Convert text to speech using Piper TTS with streaming playback.
 
 **Parameters:**
-- `text` (str): Text to convert to speech (required)
-- `volume` (int): Volume level from 0-100 (default: 50)
-- `save_file` (bool): Whether to save audio file (default: True)
+- `text` (str, required): Text to convert to speech
+- `volume` (int, optional): Volume level from 0-100 (default: 50)
 
-**Returns:** Path to saved WAV file or success message
+**Returns:** Success message with truncated text preview
 
 **Example:**
 ```json
 {
-  "text": "Hello, welcome to the Distiller CM5!",
-  "volume": 75,
-  "save_file": true
+  "text": "Hello, welcome to the Distiller CM5 platform!",
+  "volume": 75
 }
 ```
 
-### 2. `play_text`
-Convert text to speech and play immediately without saving.
+**Response:**
+```
+"Successfully played text: 'Hello, welcome to the Distiller CM5 platform!'"
+```
 
-**Parameters:**
-- `text` (str): Text to convert to speech and play
-- `volume` (int): Volume level from 0-100 (default: 50)
-- `sound_card` (str): Sound card name (default: "snd_rpi_pamir_ai_soundcard")
-
-**Returns:** Success message indicating text was played
-
-### 3. `list_tts_files`
-List all generated TTS files with metadata.
+### 2. `get_speaker_status`
+Get comprehensive speaker service status and health information.
 
 **Parameters:** None
 
-**Returns:** JSON formatted list of TTS files with details (filename, path, size, creation date)
+**Returns:** Detailed service status including:
+- Service initialization status
+- Current voice model information
+- Output directory and file counts
+- Piper executable path
 
-### 4. `get_available_models`
-Get list of available Piper TTS models.
+**Example Response:**
+```
+Speaker Service Status:
+- Service: Running normally
+- Model: en_US-amy-medium.onnx
+- Output directory: /tmp/tts_output
+- Generated files: 5
+- Piper executable: /path/to/piper
+```
 
-**Parameters:** None
+## Architecture
 
-**Returns:** List of available TTS models
+### Server Components
 
-### 5. `get_speaker_status`
-Get speaker service status and health information.
+**server.py** - MCP Server Implementation
+- FastMCP-based server with async tool handlers
+- Transport protocol management (stdio/SSE/HTTP)
+- Error handling and validation
+- CLI argument parsing
 
-**Parameters:** None
+**speaker.py** - Domain Logic
+- Piper TTS integration via distiller-cm5-sdk
+- Audio streaming and playback management
+- Service initialization and health monitoring
+- Resource cleanup and error recovery
 
-**Returns:** Service status including model details, file counts, and configuration
+### Audio Configuration
 
-### 6. `clean_old_files`
-Clean up old TTS files, keeping only the most recent ones.
-
-**Parameters:**
-- `max_files` (int): Maximum number of files to keep (default: 10)
-
-**Returns:** Summary of cleanup operation
-
-## Configuration
-
-### Audio Output
-The server uses the default sound card `snd_rpi_pamir_ai_soundcard` for the Distiller CM5. You can specify different sound cards using the `sound_card` parameter in the `play_text` tool.
-
-### File Storage
-Generated TTS files are stored in `/tmp/tts_output/` with automatic timestamped naming:
-- Format: `tts_{timestamp}_{text_preview}.wav`
-- Files are sorted by creation time (newest first)
-
-### TTS Model
-Currently uses the `en_US-amy-medium.onnx` model from the Piper library. The model provides:
-- High-quality English speech synthesis
-- Natural-sounding voice (Amy)
-- Optimized for real-time generation
+- **Sound Card**: `snd_rpi_pamir_ai_soundcard` (Distiller CM5 default)
+- **Output Directory**: `/tmp/tts_output/` for temporary files
+- **Audio Format**: Streamed PCM audio via Piper
+- **Playback Method**: Direct streaming to ALSA sound system
 
 ## Development
 
 ### Setup Development Environment
 
 ```bash
-# Install with dev dependencies
+# Install with development dependencies
 uv sync --dev
 
-# Run tests (if any)
-uv run pytest
+# Run type checking
+uv run mypy .
 
 # Format code
 uv run black .
 uv run isort .
 
-# Type checking
-uv run mypy .
+# Run linting
+uv run flake8 .
 ```
 
 ### Project Structure
 
 ```
 speaker-mcp/
-├── server.py          # MCP server implementation
-├── speaker.py         # Speaker domain logic (Piper integration)
-├── pyproject.toml     # UV project configuration
-└── README.md         # This file
+├── server.py          # MCP server with FastMCP integration
+├── speaker.py         # Piper TTS domain logic and service management
+├── pyproject.toml     # UV project configuration and dependencies
+├── uv.lock           # Dependency lock file
+└── README.md         # Project documentation
 ```
+
+### Error Handling
+
+The implementation includes comprehensive error handling:
+
+- **Import Errors**: Graceful degradation when Piper SDK unavailable
+- **Validation Errors**: Input validation with clear error messages
+- **Runtime Errors**: Service failures handled with detailed error reporting
+- **Cleanup**: Proper resource cleanup on server shutdown
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Speaker service not available**
-   - Check that distiller-cm5-sdk is properly installed
-   - Verify Piper models are available in the SDK
-   - Check system permissions for audio devices
+**1. "Speaker service not available: Piper library not loaded"**
+- Verify `distiller-cm5-sdk` is properly installed
+- Check that the Piper library is accessible from the SDK
+- Ensure all dependencies are installed with `uv sync`
 
-2. **Audio playback failures**
-   - Use `get_speaker_status` to check service health
-   - Verify sound card name with `aplay -l`
-   - Check audio system permissions and configuration
+**2. "Speech streaming failed" errors**
+- Use `get_speaker_status` to check service health
+- Verify sound card availability with `aplay -l`
+- Check audio system permissions and ALSA configuration
+- Ensure `/tmp/tts_output/` directory is writable
 
-3. **File generation errors**
-   - Ensure `/tmp/tts_output/` directory is writable
-   - Check available disk space
-   - Verify text input is valid (non-empty)
+**3. Empty or invalid text input**
+- Text parameter cannot be empty or whitespace-only
+- Verify text encoding (UTF-8 recommended)
+- Check for special characters that might cause issues
 
-4. **Volume or quality issues**
-   - Adjust volume parameter (0-100 range)
-   - Check system audio mixer settings
-   - Test with different text samples
+**4. Volume or audio quality issues**
+- Volume parameter must be between 0-100
+- Test with different volume levels
+- Check system audio mixer settings (`alsamixer`)
+- Verify sound card is not muted or at zero volume
 
-### Debugging
+### Debugging Commands
 
-Use the `get_speaker_status` tool to get detailed information about:
-- Service initialization status
-- Available models and paths
-- File counts and storage location
-- Piper executable status
+```bash
+# Check service status
+echo '{"method": "tools/call", "params": {"name": "get_speaker_status"}}' | uv run python server.py
+
+# Test basic TTS functionality
+echo '{"method": "tools/call", "params": {"name": "text_to_speech", "arguments": {"text": "test", "volume": 50}}}' | uv run python server.py
+
+# Check available sound cards
+aplay -l
+
+# Test audio system
+speaker-test -c 2 -r 48000 -D snd_rpi_pamir_ai_soundcard
+```
 
 ## Dependencies
 
+**Runtime:**
 - Python 3.11+
-- MCP library (mcp[cli]>=1.1.2)
-- distiller-cm5-sdk (contains Piper integration)
-- Piper TTS models and executable
+- mcp[cli] >= 1.1.2 (Model Context Protocol library)
+- distiller-cm5-sdk (Piper TTS integration)
 
-## Audio Formats
+**Development:**
+- pytest, pytest-asyncio (testing)
+- black, isort (code formatting)
+- flake8 (linting)
+- mypy (type checking)
 
-- **Output Format**: WAV files (16-bit, 22050 Hz)
-- **Real-time Streaming**: Raw PCM audio to ALSA
-- **Compression**: Uncompressed audio for best quality
-- **Compatibility**: Standard WAV format playable on any audio system 
+## Technical Details
+
+**Audio Processing:**
+- Real-time PCM audio streaming via Piper
+- No intermediate file generation for playback
+- ALSA-based audio output for low latency
+- Support for standard audio formats and sample rates
+
+**MCP Integration:**
+- FastMCP framework for rapid development
+- Async tool handlers for non-blocking operations
+- JSON-RPC based communication protocol
+- Multi-transport support (stdio/SSE/HTTP) 
