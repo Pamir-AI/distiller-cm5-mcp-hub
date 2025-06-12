@@ -21,7 +21,7 @@ StandardError=journal
 SyslogIdentifier=mcp-hub
 
 # Security settings (relaxed for debugging)
-NoNewPrivileges=true
+# NoNewPrivileges=true
 
 [Install]
 WantedBy=multi-user.target 
