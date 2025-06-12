@@ -1,0 +1,27 @@
+[Unit]
+Description=MCP Hub Service - Manages Camera, Mic, and Speaker MCPs
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=distiller
+Group=distiller
+WorkingDirectory=/home/distiller/distiller-cm5-mcp-hub
+ExecStart=/usr/bin/python3 /home/distiller/distiller-cm5-mcp-hub/run_all_mcps.py
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+Environment=PATH=/home/distiller/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mcp-hub
+
+# Security settings (relaxed for debugging)
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target 

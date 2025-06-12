@@ -1,0 +1,23 @@
+{
+  "camera": {
+    "enabled": true,
+    "port": 8001,
+    "host": "0.0.0.0",
+    "project_dir": "camera-mcp",
+    "description": "Camera MCP Service"
+  },
+  "mic": {
+    "enabled": true,
+    "port": 8002,
+    "host": "0.0.0.0",
+    "project_dir": "mic-mcp",
+    "description": "Microphone MCP Service"
+  },
+  "speaker": {
+    "enabled": true,
+    "port": 8003,
+    "host": "0.0.0.0",
+    "project_dir": "speaker-mcp",
+    "description": "Speaker MCP Service"
+  }
+} 
