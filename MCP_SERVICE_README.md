@@ -14,7 +14,7 @@ This service manages multiple MCP (Model Context Protocol) services automaticall
 ### 1. Install the Service
 
 ```bash
-cd /home/distiller/distiller-cm5-mcp-hub
+cd /opt/distiller-cm5-mcp-hub
 ./manage_mcp_service.sh install
 ```
 
@@ -120,7 +120,7 @@ sudo systemctl disable mcp.service
 
 3. **Each MCP runs:**
    ```bash
-   cd /home/distiller/distiller-cm5-mcp-hub/projects/{project_dir}
+   cd /opt/distiller-cm5-mcp-hub/projects/{project_dir}
    uv run python server.py --transport sse --port {port}
    ```
 

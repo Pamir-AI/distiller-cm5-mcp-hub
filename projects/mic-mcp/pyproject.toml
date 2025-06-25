@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 packages = ["."]
 
 [tool.uv.sources]
-distiller-cm5-sdk = { path = "/home/distiller/distiller-cm5-sdk/dist/distiller_cm5_sdk-0.1.0-py3-none-any.whl" }
+distiller-cm5-sdk = { path = "/opt/distiller-cm5-sdk/dist/distiller_cm5_sdk-0.1.0-py3-none-any.whl" }
 
 [project]
 name = "distiller-cm5-mic-mcp"

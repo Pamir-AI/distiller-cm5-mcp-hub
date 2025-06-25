@@ -25,7 +25,7 @@ class MCPManager:
         self.processes: Dict[str, subprocess.Popen] = {}
         self.running = True
         self.shutdown_event = Event()
-        self.base_dir = "/home/distiller/distiller-cm5-mcp-hub/projects"
+        self.base_dir = "/opt/distiller-cm5-mcp-hub/projects"
         
         # Setup signal handlers
         signal.signal(signal.SIGTERM, self._signal_handler)
@@ -215,7 +215,7 @@ class MCPManager:
             self.shutdown()
 
 def main():
-    config_path = "/home/distiller/distiller-cm5-mcp-hub/mcp_config.json"
+    config_path = "/opt/distiller-cm5-mcp-hub/mcp_config.json"
     
     if not os.path.exists(config_path):
         logger.error(f"Configuration file not found: {config_path}")
