@@ -19,14 +19,14 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-# Import the parakeet module from distiller-cm5-sdk
-try:
-    from distiller_cm5_sdk.parakeet.parakeet import Parakeet
-    PARAKEET_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: Failed to import parakeet: {e}")
+# Import the parakeet module from the installed SDK
+from sdk_imports import import_parakeet
+
+Parakeet = import_parakeet()
+PARAKEET_AVAILABLE = Parakeet is not None
+if not PARAKEET_AVAILABLE:
+    print("Warning: Failed to import parakeet from installed SDK")
     print("Running in simulation mode")
-    PARAKEET_AVAILABLE = False
 
 # Create MCP server instance
 mcp = FastMCP("Microphone MCP Server")
@@ -35,7 +35,7 @@ mcp = FastMCP("Microphone MCP Server")
 recordings_dir = Path("recordings")
 recordings_dir.mkdir(exist_ok=True)
 recordings_db: Dict[str, Dict] = {}
-parakeet_instance: Optional = None
+parakeet_instance: Optional[object] = None
 recording_timer: Optional[threading.Timer] = None
 current_recording_id: Optional[str] = None
 simulation_mode = False

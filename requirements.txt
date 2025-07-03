@@ -1,11 +1,56 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-python-multipart==0.0.6
-jinja2==3.1.2
-aiofiles==23.2.1
-pydantic>=2.8.0
-pydantic-settings>=2.4.0
-python-dotenv==1.0.0
-psutil==5.9.6
-websockets==12.0
-httpx==0.25.2 
+# Core MCP and audio packages
+sounddevice==0.5.2
+soundfile>=0.12.1
+picamera2==0.3.27
+mcp==1.10.1
+
+# FastAPI ecosystem - updated to be compatible with mcp==1.10.1 requirements
+fastapi>=0.92.0,<0.112.0
+uvicorn>=0.17.6,<0.36.0
+starlette>=0.27.0,<0.40.0
+pydantic>=2.7.2,<3.0.0
+httpx>=0.23.3,<0.29.0
+python-multipart>=0.0.5,<0.1.0
+
+# Compatible supporting packages
+anyio>=4.5,<5.0.0
+httpcore>=0.16.3,<1.1.0
+h11>=0.14.0,<0.17.0
+typing-extensions>=4.4.0,<5.0.0
+
+# Audio processing dependencies
+numpy>=1.24.0
+pyaudio>=0.2.11
+
+# Camera and image processing
+PiDNG>=4.0.9
+piexif>=1.1.3
+simplejpeg>=1.8.2
+v4l2-python3>=0.3.5
+av>=15.0.0
+
+# System utilities
+python-prctl>=1.8.1
+tqdm>=4.67.1
+python-dotenv>=1.1.1
+
+# JSON schema validation
+jsonschema>=4.24.0
+jsonschema-specifications>=2025.4.1
+referencing>=0.36.2
+rpds-py>=0.26.0
+
+# HTTP and SSE
+httpx-sse>=0.4.1
+sse-starlette>=2.3.6
+
+# Configuration management
+pydantic-settings>=2.10.1
+
+# Low-level dependencies
+CFFI>=1.17.1
+pycparser>=2.22
+libarchive-c>=5.3
+annotated-types>=0.7.0
+pydantic-core>=2.33.2
+typing-inspection>=0.4.1

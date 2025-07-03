@@ -1,0 +1,8 @@
+*.py opt/distiller-mcp-hub/
+projects/ opt/distiller-mcp-hub/
+requirements.txt opt/distiller-mcp-hub/
+pyproject.toml opt/distiller-mcp-hub/
+venv_wrapper.sh opt/distiller-mcp-hub/
+mcp_config.json opt/distiller-mcp-hub/
+manage_mcp_service.sh usr/bin/
+mcp.service lib/systemd/system/ 

@@ -1,0 +1,131 @@
+#!/bin/sh
+set -e
+
+# Source debian helper functions
+. /usr/share/debconf/confmodule
+
+# Create distiller user and group if they don't exist
+if ! getent group distiller >/dev/null 2>&1; then
+    addgroup --system distiller
+fi
+
+if ! getent passwd distiller >/dev/null 2>&1; then
+    adduser --system --ingroup distiller --home /opt/distiller-mcp-hub --shell /bin/bash distiller
+fi
+
+# Set up directories and permissions
+install -d -o distiller -g distiller -m 755 /var/log/distiller-mcp-hub
+
+# Set ownership of application files
+find /opt/distiller-mcp-hub -type f -exec chown distiller:distiller {} \;
+find /opt/distiller-mcp-hub -type d -exec chown distiller:distiller {} \;
+chmod +x /usr/bin/manage_mcp_service.sh
+chmod +x /opt/distiller-mcp-hub/venv_wrapper.sh
+
+# Create recordings directory for mic MCP
+install -d -o distiller -g distiller -m 755 /opt/distiller-mcp-hub/projects/mic-mcp/recordings
+
+# Create TTS output directory for speaker MCP
+install -d -m 1777 /tmp/tts_output
+
+# Set up audio permissions for distiller user
+usermod -a -G audio distiller
+
+# Try to install uv for faster package management
+echo "Attempting to install uv package manager..."
+UV_BINARY=""
+if command -v uv >/dev/null 2>&1; then
+    echo "uv is already available"
+    UV_BINARY="uv"
+elif curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1; then
+    # Make uv available system-wide
+    if [ -f "/root/.local/bin/uv" ]; then
+        cp /root/.local/bin/uv /usr/local/bin/uv
+        cp /root/.local/bin/uvx /usr/local/bin/uvx
+        chmod +x /usr/local/bin/uv /usr/local/bin/uvx
+        echo "uv installed and made available system-wide"
+        UV_BINARY="/usr/local/bin/uv"
+    else
+        echo "uv installation failed - falling back to pip"
+        UV_BINARY=""
+    fi
+else
+    echo "uv installation failed - falling back to pip"
+    UV_BINARY=""
+fi
+
+# Create virtual environment
+echo "Creating Python virtual environment..."
+VENV_PATH="/opt/distiller-mcp-hub/.venv"
+if [ -n "$UV_BINARY" ]; then
+    "$UV_BINARY" venv "$VENV_PATH" --python python3
+else
+    python3 -m venv "$VENV_PATH"
+fi
+
+# Set ownership of virtual environment
+chown -R distiller:distiller "$VENV_PATH"
+
+# Install Python packages
+echo "Installing Python packages..."
+if [ -n "$UV_BINARY" ]; then
+    echo "Using uv for package installation..."
+    cd /opt/distiller-mcp-hub && "$UV_BINARY" pip install --python ./.venv/bin/python -r requirements.txt
+else
+    echo "Using pip for package installation..."
+    cd /opt/distiller-mcp-hub && ./.venv/bin/pip install --upgrade pip
+    cd /opt/distiller-mcp-hub && ./.venv/bin/pip install -r requirements.txt
+fi
+
+# Set proper ownership after installation
+chown -R distiller:distiller "$VENV_PATH"
+
+# Verify installation
+echo "Verifying package installation..."
+VENV_PYTHON="/opt/distiller-mcp-hub/.venv/bin/python"
+if [ -f "$VENV_PYTHON" ] && cd /opt/distiller-mcp-hub && "$VENV_PYTHON" -c "import sys" >/dev/null 2>&1; then
+    echo "Virtual environment is working"
+    
+    # Check key packages
+    for pkg in sounddevice picamera2 mcp fastapi uvicorn; do
+        if cd /opt/distiller-mcp-hub && "$VENV_PYTHON" -c "import $pkg" >/dev/null 2>&1; then
+            echo "$pkg is available"
+        else
+            echo "$pkg is not available"
+        fi
+    done
+else
+    echo "Virtual environment setup failed"
+fi
+
+# Display package manager info
+if [ -n "$UV_BINARY" ]; then
+    echo "Using uv for package management"
+else
+    echo "Using pip for package management"
+fi
+
+# Reload systemd and enable service
+systemctl daemon-reload
+
+# Installation complete message
+if [ "$1" = "configure" ]; then
+    if [ -z "$2" ] || dpkg --compare-versions "$2" ge "0.1.0"; then
+        echo ""
+        echo "Distiller MCP Hub has been installed successfully!"
+        echo ""
+        echo "To enable the service at boot time, run:"
+        echo "  sudo systemctl enable mcp.service"
+        echo ""
+        echo "To start the service now, run:"
+        echo "  sudo systemctl start mcp.service"
+        echo ""
+        echo "To manage the service, use:"
+        echo "  distiller-mcp-manage {start|stop|restart|status|logs}"
+        echo ""
+        echo "Configuration file: /opt/distiller-mcp-hub/mcp_config.json"
+        echo "Logs: sudo journalctl -u mcp.service"
+    fi
+fi
+
+#DEBHELPER# 

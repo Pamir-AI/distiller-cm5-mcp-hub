@@ -9,7 +9,7 @@ Type=simple
 User=distiller
 Group=distiller
 WorkingDirectory=/opt/distiller-mcp-hub
-ExecStart=/usr/bin/python3 /opt/distiller-mcp-hub/run_all_mcps.py
+ExecStart=/opt/distiller-mcp-hub/.venv/bin/python /opt/distiller-mcp-hub/run_all_mcps.py
 Restart=always
 RestartSec=10
 Environment=PYTHONUNBUFFERED=1

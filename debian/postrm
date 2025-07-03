@@ -1,0 +1,89 @@
+#!/bin/sh
+set -e
+
+# Clean up after complete removal
+if [ "$1" = "purge" ]; then
+    echo "Purging Distiller MCP Hub..."
+    
+    # Stop and disable the service if it's running
+    systemctl stop mcp.service 2>/dev/null || true
+    systemctl disable mcp.service 2>/dev/null || true
+    
+    # Remove configuration files
+    echo "Removing configuration files..."
+    rm -rf /etc/distiller-mcp-hub
+    rm -rf /etc/default/distiller-mcp-hub 2>/dev/null || true
+    
+    # Remove log directory and files
+    echo "Removing log files..."
+    rm -rf /var/log/distiller-mcp-hub
+    
+    # Remove application directory
+    echo "Removing application files..."
+    rm -rf /opt/distiller-mcp-hub
+    
+    # Remove systemd service file
+    echo "Removing systemd service..."
+    rm -f /lib/systemd/system/mcp.service
+    rm -f /lib/systemd/system/distiller-mcp-hub.service 2>/dev/null || true
+    
+    # Remove symlinks and management scripts
+    echo "Removing symlinks..."
+    rm -f /usr/local/bin/distiller-mcp-manage
+    rm -f /usr/bin/manage_mcp_service.sh
+    
+    # Remove uv binaries if they were installed by this package
+    echo "Removing uv binaries installed by this package..."
+    if [ -f /usr/local/bin/uv ]; then
+        rm -f /usr/local/bin/uv
+    fi
+    if [ -f /usr/local/bin/uvx ]; then
+        rm -f /usr/local/bin/uvx
+    fi
+    
+    # Remove temporary files created by the service
+    echo "Removing temporary files..."
+    if [ -d /tmp/tts_output ]; then
+        rm -rf /tmp/tts_output
+    fi
+    for tmpfile in /tmp/distiller-mcp-*; do
+        if [ -e "$tmpfile" ]; then
+            rm -rf "$tmpfile"
+        fi
+    done
+    
+    # Remove any runtime files
+    rm -rf /run/distiller-mcp-hub 2>/dev/null || true
+    
+    # Remove any cache files
+    rm -rf /var/cache/distiller-mcp-hub 2>/dev/null || true
+    
+    # Remove any lock files
+    rm -f /var/lock/distiller-mcp-hub* 2>/dev/null || true
+    
+    # Clean up pip cache for distiller user (if it exists)
+    if getent passwd distiller >/dev/null 2>&1; then
+        rm -rf /opt/distiller-mcp-hub/.cache 2>/dev/null || true
+    fi
+    
+    # Remove distiller user and group
+    echo "Removing distiller user and group..."
+    if getent passwd distiller >/dev/null 2>&1; then
+        deluser --system distiller 2>/dev/null || true
+    fi
+    if getent group distiller >/dev/null 2>&1; then
+        delgroup --system distiller 2>/dev/null || true
+    fi
+    
+    # Reload systemd
+    echo "Reloading systemd..."
+    systemctl daemon-reload 2>/dev/null || true
+    
+    # Remove documentation
+    echo "Removing documentation..."
+    rm -rf /usr/share/doc/distiller-mcp-hub
+    
+    echo "Distiller MCP Hub has been completely removed."
+fi
+
+#DEBHELPER# 

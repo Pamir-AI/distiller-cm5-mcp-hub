@@ -1,0 +1,9 @@
+distiller-mcp-hub (0.0.1-1) unstable; urgency=medium
+
+  * Initial release
+  * MCP Hub with Camera, Microphone, and Speaker services
+  * systemd integration for automatic startup
+  * Hardware control via Model Context Protocol
+  * Support for HTTP, SSE, and stdio transport protocols
+
+ -- PamirAI Incorporated <support@pamir.ai>  Thu, 03 Jul 2025 17:17:00 +0000 

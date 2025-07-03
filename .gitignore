@@ -243,3 +243,16 @@ config/local.*
 *.temp
 *.bak
 *.backup 
+
+# Build artifacts
+build/
+dist/
+debian/tmp/
+debian/.debhelper/
+debian/files
+debian/debhelper-build-stamp
+debian/distiller-mcp-hub/
+debian/distiller-mcp-hub.*
+
+# Extras
+final_review_gate.py

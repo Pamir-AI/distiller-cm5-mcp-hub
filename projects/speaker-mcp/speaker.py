@@ -31,14 +31,16 @@ class Speaker:
     def _initialize(self):
         """Initialize Piper TTS."""
         try:
-            from distiller_cm5_sdk.piper.piper import Piper
+            from sdk_imports import import_piper
+            Piper = import_piper()
+            if Piper is None:
+                raise RuntimeError("Failed to import Piper library from installed SDK")
+            
             self.piper = Piper()
             
             # Create output directory if it doesn't exist
             os.makedirs(self.output_directory, exist_ok=True)
             
-        except ImportError as e:
-            raise RuntimeError(f"Failed to import Piper library: {e}")
         except Exception as e:
             raise RuntimeError(f"Failed to initialize Piper: {e}")
     

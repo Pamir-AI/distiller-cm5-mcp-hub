@@ -63,7 +63,7 @@ cd distiller-mcp-hub
 
 2. **Install dependencies:**
 ```bash
-uv sync
+pip install -r requirements.txt
 ```
 
 3. **Install individual project dependencies:**

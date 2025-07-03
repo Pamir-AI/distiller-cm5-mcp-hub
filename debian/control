@@ -1,0 +1,60 @@
+Source: distiller-mcp-hub
+Section: net
+Priority: optional
+Maintainer: PamirAI Incorporated <support@pamir.ai>
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               python3-setuptools,
+               python3-wheel,
+               python3-build,
+               python3-pip
+Standards-Version: 4.6.2
+Homepage: https://github.com/pamir-ai/distiller-cm5-mcp-hub
+Vcs-Browser: https://github.com/pamir-ai/distiller-cm5-mcp-hub.git
+Vcs-Git: https://github.com/pamir-ai/distiller-cm5-mcp-hub.git
+Rules-Requires-Root: no
+
+Package: distiller-mcp-hub
+Architecture: all
+Depends: ${python3:Depends},
+         ${misc:Depends},
+         python3,
+         python3-pip,
+         python3-venv,
+         python3-fastapi,
+         python3-uvicorn,
+         python3-pydantic,
+         python3-picamera2,
+         python3-websockets,
+         python3-httpx,
+         python3-psutil,
+         python3-pillow,
+         python3-numpy,
+         curl,
+         systemd,
+         alsa-utils,
+         libasound2,
+         libasound2-plugins,
+         libcap-dev,
+         libcamera-dev,
+         pipewire,
+         pipewire-alsa,
+         pipewire-audio,
+         adduser,
+         distiller-cm5-sdk
+Recommends: python3-pytest,
+            python3-requests,
+            python3-aiofiles
+Description: Distiller MCP Hub - Hardware Control Services
+ A comprehensive Model Context Protocol (MCP) server hub that provides
+ hardware control services for the Distiller CM5 platform.
+ .
+ This package includes:
+  * Camera MCP Service - Pi Camera control and image capture
+  * Microphone MCP Service - Audio recording and transcription
+  * Speaker MCP Service - Text-to-speech using Piper TTS
+  * MCP Hub Manager - Orchestrates all services
+  * systemd integration for automatic startup
+ .
+ The services provide HTTP/SSE APIs for hardware control and can be
+ integrated with MCP-compatible clients like Claude Desktop. 

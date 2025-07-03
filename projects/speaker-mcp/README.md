@@ -12,11 +12,11 @@ Text-to-Speech functionality using the Piper library for the Distiller CM5 platf
 
 ## Installation
 
-1. Ensure you have the distiller-cm5-sdk wheel available
-2. Install dependencies using UV:
+1. Ensure you have the distiller-cm5-sdk installed at `/opt/distiller-cm5-sdk`
+2. Install dependencies:
    ```bash
    cd /opt/distiller-mcp-hub/projects/speaker-mcp
-   uv sync
+   pip install -e .
    ```
 
 ## Usage
@@ -153,9 +153,9 @@ The implementation includes comprehensive error handling:
 ### Common Issues
 
 **1. "Speaker service not available: Piper library not loaded"**
-- Verify `distiller-cm5-sdk` is properly installed
+- Verify `distiller-cm5-sdk` is properly installed at `/opt/distiller-cm5-sdk`
 - Check that the Piper library is accessible from the SDK
-- Ensure all dependencies are installed with `uv sync`
+- Ensure all dependencies are installed with `pip install -e .`
 
 **2. "Speech streaming failed" errors**
 - Use `get_speaker_status` to check service health
@@ -195,7 +195,7 @@ speaker-test -c 2 -r 48000 -D snd_rpi_pamir_ai_soundcard
 **Runtime:**
 - Python 3.11+
 - mcp[cli] >= 1.1.2 (Model Context Protocol library)
-- distiller-cm5-sdk (Piper TTS integration)
+- distiller-cm5-sdk (Piper TTS integration, installed at `/opt/distiller-cm5-sdk`)
 
 **Development:**
 - pytest, pytest-asyncio (testing)

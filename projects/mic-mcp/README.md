@@ -13,12 +13,7 @@ An MCP (Model Context Protocol) server that provides audio recording and transcr
 
 ## Installation
 
-1. Ensure you have the distiller-cm5-sdk installed and accessible:
-   ```bash
-   # Install distiller-cm5-sdk (adjust path as needed)
-   pip install /path/to/distiller-cm5-sdk
-   ```
-
+1. Ensure you have the distiller-cm5-sdk installed at `/opt/distiller-cm5-sdk`
 2. Install the MCP server dependencies:
    ```bash
    pip install -r requirements.txt
@@ -191,7 +186,7 @@ This server follows the MCP protocol and can be integrated with any MCP-compatib
 ## Dependencies
 
 - **mcp**: Model Context Protocol server library
-- **distiller-cm5-sdk**: Audio processing and transcription
+- **distiller-cm5-sdk**: Audio processing and transcription (installed at `/opt/distiller-cm5-sdk`)
 - **Python 3.9+**: Required for the SDK
 
 ## License

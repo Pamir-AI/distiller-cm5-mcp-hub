@@ -1,0 +1,42 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with python3
+
+override_dh_auto_install:
+	# Install Python packages
+	dh_auto_install
+	
+	# Create config and log directories
+	mkdir -p debian/distiller-mcp-hub/etc/default
+	mkdir -p debian/distiller-mcp-hub/opt/distiller-mcp-hub
+	mkdir -p debian/distiller-mcp-hub/lib/systemd/system
+	mkdir -p debian/distiller-mcp-hub/usr/bin
+	mkdir -p debian/distiller-mcp-hub/var/log/distiller-mcp-hub
+	mkdir -p debian/distiller-mcp-hub/etc/distiller-mcp-hub
+
+override_dh_install:
+	dh_install
+
+override_dh_fixperms:
+	dh_fixperms
+	# Set proper permissions for distiller user
+	[ -d debian/distiller-mcp-hub/opt/distiller-mcp-hub ] && chmod 755 debian/distiller-mcp-hub/opt/distiller-mcp-hub || true
+	[ -f debian/distiller-mcp-hub/etc/distiller-mcp-hub/mcp_config.json ] && chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/mcp_config.json || true
+	[ -f debian/distiller-mcp-hub/lib/systemd/system/mcp.service ] && chmod 644 debian/distiller-mcp-hub/lib/systemd/system/mcp.service || true
+	
+	# Make Python scripts executable
+	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/run_all_mcps.py ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/run_all_mcps.py || true
+	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/camera-mcp/server.py ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/camera-mcp/server.py || true
+	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/mic-mcp/server.py ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/mic-mcp/server.py || true
+	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/speaker-mcp/server.py ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/speaker-mcp/server.py || true
+	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/sanity_check.py ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/sanity_check.py || true
+	
+	# Make wrapper script executable
+	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/venv_wrapper.sh ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/venv_wrapper.sh || true
+
+override_dh_installdocs:
+	dh_installdocs
+	# Install additional documentation
+	cp README.md debian/distiller-mcp-hub/opt/distiller-mcp-hub/
+	cp MCP_SERVICE_README.md debian/distiller-mcp-hub/opt/distiller-mcp-hub/ 

@@ -1,0 +1,17 @@
+# Maintainer scripts call systemctl as required for systemd services
+distiller-mcp-hub: maintainer-script-calls-systemctl
+
+# Uses implicit await trigger for systemd (standard for systemd services)
+distiller-mcp-hub: uses-implicit-await-trigger
+
+# Initial upload closes no bugs (this is normal for new packages)
+distiller-mcp-hub: initial-upload-closes-no-bugs
+
+# Package installs files in /opt (intentional for application software)
+distiller-mcp-hub: dir-or-file-in-opt
+
+# Tmp files are handled securely in maintainer scripts
+distiller-mcp-hub: possibly-insecure-handling-of-tmp-files-in-maintainer-script
+
+# Recursive privilege changes are necessary for proper ownership
+distiller-mcp-hub: recursive-privilege-change 
