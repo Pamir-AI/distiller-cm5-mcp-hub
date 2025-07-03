@@ -60,4 +60,4 @@ mypy .
 
 ## License
 
-This project is part of the distiller-cm5-mcp-hub ecosystem. 
+This project is part of the distiller-mcp-hub ecosystem. 

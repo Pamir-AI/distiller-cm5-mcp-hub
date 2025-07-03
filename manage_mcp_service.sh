@@ -2,9 +2,9 @@
 # MCP Hub Service Management Script
 
 SERVICE_NAME="mcp.service"
-SERVICE_FILE="/opt/distiller-cm5-mcp-hub/mcp.service"
+SERVICE_FILE="/opt/distiller-mcp-hub/mcp.service"
 SYSTEMD_DIR="/etc/systemd/system"
-CONFIG_FILE="/opt/distiller-cm5-mcp-hub/mcp_config.json"
+CONFIG_FILE="/opt/distiller-mcp-hub/mcp_config.json"
 
 show_usage() {
     echo "Usage: $0 {install|uninstall|start|stop|restart|status|logs|config|enable|disable}"

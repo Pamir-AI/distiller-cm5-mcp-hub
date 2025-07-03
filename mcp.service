@@ -8,8 +8,8 @@ StartLimitIntervalSec=0
 Type=simple
 User=distiller
 Group=distiller
-WorkingDirectory=/opt/distiller-cm5-mcp-hub
-ExecStart=/usr/bin/python3 /opt/distiller-cm5-mcp-hub/run_all_mcps.py
+WorkingDirectory=/opt/distiller-mcp-hub
+ExecStart=/usr/bin/python3 /opt/distiller-mcp-hub/run_all_mcps.py
 Restart=always
 RestartSec=10
 Environment=PYTHONUNBUFFERED=1

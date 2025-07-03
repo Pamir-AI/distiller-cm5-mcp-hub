@@ -58,7 +58,7 @@ Microphone control and audio recording functionality.
 1. **Clone the repository:**
 ```bash
 git clone <repository-url>
-cd distiller-cm5-mcp-hub
+cd distiller-mcp-hub
 ```
 
 2. **Install dependencies:**
@@ -200,7 +200,7 @@ The transport layer can be configured through environment variables:
 ## Architecture
 
 ```
-distiller-cm5-mcp-hub/
+distiller-mcp-hub/
 ├── mcp_transport.py          # Shared transport layer
 ├── sanity_check.py          # Validation utilities
 ├── projects/                # MCP server implementations

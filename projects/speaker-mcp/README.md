@@ -15,7 +15,7 @@ Text-to-Speech functionality using the Piper library for the Distiller CM5 platf
 1. Ensure you have the distiller-cm5-sdk wheel available
 2. Install dependencies using UV:
    ```bash
-   cd /opt/distiller-cm5-mcp-hub/projects/speaker-mcp
+   cd /opt/distiller-mcp-hub/projects/speaker-mcp
    uv sync
    ```
 
