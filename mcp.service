@@ -14,6 +14,8 @@ Restart=always
 RestartSec=10
 Environment=PYTHONUNBUFFERED=1
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONPATH=/opt/distiller-cm5-sdk:/opt/distiller-cm5-sdk/src
+Environment=LD_LIBRARY_PATH=/opt/distiller-cm5-sdk/lib
 
 # Logging
 StandardOutput=journal

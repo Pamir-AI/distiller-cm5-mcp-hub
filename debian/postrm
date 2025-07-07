@@ -12,11 +12,32 @@ if [ "$1" = "purge" ]; then
     # Remove configuration files
     echo "Removing configuration files..."
     rm -rf /etc/distiller-mcp-hub
-    rm -rf /etc/default/distiller-mcp-hub 2>/dev/null || true
     
     # Remove log directory and files
     echo "Removing log files..."
     rm -rf /var/log/distiller-mcp-hub
+    
+    # Remove all virtual environments
+    echo "Removing virtual environments..."
+    rm -rf /opt/distiller-mcp-hub/.venv
+    rm -rf /opt/distiller-mcp-hub/projects/camera-mcp/.venv
+    rm -rf /opt/distiller-mcp-hub/projects/mic-mcp/.venv
+    rm -rf /opt/distiller-mcp-hub/projects/speaker-mcp/.venv
+    
+    # Remove uv cache and config for distiller user
+    echo "Removing uv cache and configuration..."
+    if getent passwd distiller >/dev/null 2>&1; then
+        # Get distiller user's home directory
+        DISTILLER_HOME=$(getent passwd distiller | cut -d: -f6)
+        rm -rf "$DISTILLER_HOME/.cache/uv" 2>/dev/null || true
+        rm -rf "$DISTILLER_HOME/.local/share/uv" 2>/dev/null || true
+        rm -rf "$DISTILLER_HOME/.config/uv" 2>/dev/null || true
+    fi
+    
+    # Remove root uv cache (in case it was created during installation)
+    rm -rf /root/.cache/uv 2>/dev/null || true
+    rm -rf /root/.local/share/uv 2>/dev/null || true
+    rm -rf /root/.config/uv 2>/dev/null || true
     
     # Remove application directory
     echo "Removing application files..."
@@ -25,11 +46,9 @@ if [ "$1" = "purge" ]; then
     # Remove systemd service file
     echo "Removing systemd service..."
     rm -f /lib/systemd/system/mcp.service
-    rm -f /lib/systemd/system/distiller-mcp-hub.service 2>/dev/null || true
     
     # Remove symlinks and management scripts
     echo "Removing symlinks..."
-    rm -f /usr/local/bin/distiller-mcp-manage
     rm -f /usr/bin/manage_mcp_service.sh
     
     # Remove uv binaries if they were installed by this package
@@ -60,11 +79,6 @@ if [ "$1" = "purge" ]; then
     
     # Remove any lock files
     rm -f /var/lock/distiller-mcp-hub* 2>/dev/null || true
-    
-    # Clean up pip cache for distiller user (if it exists)
-    if getent passwd distiller >/dev/null 2>&1; then
-        rm -rf /opt/distiller-mcp-hub/.cache 2>/dev/null || true
-    fi
     
     # Remove distiller user and group
     echo "Removing distiller user and group..."

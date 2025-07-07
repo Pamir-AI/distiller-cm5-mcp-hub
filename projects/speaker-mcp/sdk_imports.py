@@ -9,6 +9,8 @@ from pathlib import Path
 
 # Add the installed SDK path to Python path
 SDK_PATH = "/opt/distiller-cm5-sdk"
+SDK_LIB_PATH = "/opt/distiller-cm5-sdk/lib"
+
 if os.path.exists(SDK_PATH):
     # Add the SDK path to sys.path if it's not already there
     if SDK_PATH not in sys.path:
@@ -18,6 +20,15 @@ if os.path.exists(SDK_PATH):
     src_path = os.path.join(SDK_PATH, "src")
     if os.path.exists(src_path) and src_path not in sys.path:
         sys.path.insert(0, src_path)
+    
+    # Set LD_LIBRARY_PATH for native library access
+    if os.path.exists(SDK_LIB_PATH):
+        current_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+        if SDK_LIB_PATH not in current_ld_path:
+            if current_ld_path:
+                os.environ['LD_LIBRARY_PATH'] = f"{SDK_LIB_PATH}:{current_ld_path}"
+            else:
+                os.environ['LD_LIBRARY_PATH'] = SDK_LIB_PATH
 
 def import_piper():
     """

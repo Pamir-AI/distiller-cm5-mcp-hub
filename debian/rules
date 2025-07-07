@@ -8,7 +8,6 @@ override_dh_auto_install:
 	dh_auto_install
 	
 	# Create config and log directories
-	mkdir -p debian/distiller-mcp-hub/etc/default
 	mkdir -p debian/distiller-mcp-hub/opt/distiller-mcp-hub
 	mkdir -p debian/distiller-mcp-hub/lib/systemd/system
 	mkdir -p debian/distiller-mcp-hub/usr/bin
@@ -21,19 +20,33 @@ override_dh_install:
 override_dh_fixperms:
 	dh_fixperms
 	# Set proper permissions for distiller user
-	[ -d debian/distiller-mcp-hub/opt/distiller-mcp-hub ] && chmod 755 debian/distiller-mcp-hub/opt/distiller-mcp-hub || true
-	[ -f debian/distiller-mcp-hub/etc/distiller-mcp-hub/mcp_config.json ] && chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/mcp_config.json || true
-	[ -f debian/distiller-mcp-hub/lib/systemd/system/mcp.service ] && chmod 644 debian/distiller-mcp-hub/lib/systemd/system/mcp.service || true
+	chmod 755 debian/distiller-mcp-hub/opt/distiller-mcp-hub
+	chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/mcp_config.json
+	chmod 644 debian/distiller-mcp-hub/lib/systemd/system/mcp.service
 	
 	# Make Python scripts executable
-	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/run_all_mcps.py ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/run_all_mcps.py || true
-	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/camera-mcp/server.py ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/camera-mcp/server.py || true
-	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/mic-mcp/server.py ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/mic-mcp/server.py || true
-	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/speaker-mcp/server.py ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/speaker-mcp/server.py || true
-	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/sanity_check.py ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/sanity_check.py || true
+	chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/run_all_mcps.py
+	chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/camera-mcp/server.py
+	chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/mic-mcp/server.py
+	chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/speaker-mcp/server.py
 	
 	# Make wrapper script executable
-	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/venv_wrapper.sh ] && chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/venv_wrapper.sh || true
+	chmod +x debian/distiller-mcp-hub/opt/distiller-mcp-hub/venv_wrapper.sh
+	
+	# Make management script executable
+	chmod +x debian/distiller-mcp-hub/usr/bin/manage_mcp_service.sh
+	
+	# Ensure pyproject.toml files are readable
+	chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/pyproject.toml
+	chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/camera-mcp/pyproject.toml
+	chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/mic-mcp/pyproject.toml
+	chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/speaker-mcp/pyproject.toml
+	
+	# Ensure uv.lock files are readable if they exist
+	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/uv.lock ] && chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/uv.lock || true
+	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/camera-mcp/uv.lock ] && chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/camera-mcp/uv.lock || true
+	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/mic-mcp/uv.lock ] && chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/mic-mcp/uv.lock || true
+	[ -f debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/speaker-mcp/uv.lock ] && chmod 644 debian/distiller-mcp-hub/opt/distiller-mcp-hub/projects/speaker-mcp/uv.lock || true
 
 override_dh_installdocs:
 	dh_installdocs

@@ -15,8 +15,6 @@ fi
 
 # Set up directories and permissions
 install -d -o distiller -g distiller -m 755 /var/log/distiller-mcp-hub
-
-# Set ownership of application files
 find /opt/distiller-mcp-hub -type f -exec chown distiller:distiller {} \;
 find /opt/distiller-mcp-hub -type d -exec chown distiller:distiller {} \;
 chmod +x /usr/bin/manage_mcp_service.sh
@@ -31,78 +29,115 @@ install -d -m 1777 /tmp/tts_output
 # Set up audio permissions for distiller user
 usermod -a -G audio distiller
 
-# Try to install uv for faster package management
-echo "Attempting to install uv package manager..."
+# Install uv if not available
 UV_BINARY=""
 if command -v uv >/dev/null 2>&1; then
-    echo "uv is already available"
     UV_BINARY="uv"
-elif curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1; then
+elif [ -f "/usr/local/bin/uv" ] && [ -x "/usr/local/bin/uv" ]; then
+    UV_BINARY="/usr/local/bin/uv"
+    export PATH="/usr/local/bin:$PATH"
+else
+    # Install uv system-wide
+    if ! curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1; then
+        echo "Error: Failed to install uv package manager"
+        exit 1
+    fi
+    
     # Make uv available system-wide
     if [ -f "/root/.local/bin/uv" ]; then
-        cp /root/.local/bin/uv /usr/local/bin/uv
-        cp /root/.local/bin/uvx /usr/local/bin/uvx
-        chmod +x /usr/local/bin/uv /usr/local/bin/uvx
-        echo "uv installed and made available system-wide"
+        # Only copy if the target doesn't exist or is different
+        if [ ! -f "/usr/local/bin/uv" ] || ! cmp -s "/root/.local/bin/uv" "/usr/local/bin/uv"; then
+            cp /root/.local/bin/uv /usr/local/bin/uv 2>/dev/null || true
+        fi
+        if [ ! -f "/usr/local/bin/uvx" ] || ! cmp -s "/root/.local/bin/uvx" "/usr/local/bin/uvx"; then
+            cp /root/.local/bin/uvx /usr/local/bin/uvx 2>/dev/null || true
+        fi
+        chmod +x /usr/local/bin/uv /usr/local/bin/uvx 2>/dev/null || true
         UV_BINARY="/usr/local/bin/uv"
+        export PATH="/usr/local/bin:$PATH"
     else
-        echo "uv installation failed - falling back to pip"
-        UV_BINARY=""
+        echo "Error: uv installation failed"
+        exit 1
     fi
-else
-    echo "uv installation failed - falling back to pip"
-    UV_BINARY=""
 fi
 
-# Create virtual environment
-echo "Creating Python virtual environment..."
-VENV_PATH="/opt/distiller-mcp-hub/.venv"
-if [ -n "$UV_BINARY" ]; then
-    "$UV_BINARY" venv "$VENV_PATH" --python python3
+# Verify uv installation
+if [ -n "$UV_BINARY" ] && [ -x "$UV_BINARY" ]; then
+    true # uv is available
+elif command -v uv >/dev/null 2>&1; then
+    UV_BINARY="uv"
 else
-    python3 -m venv "$VENV_PATH"
+    echo "Error: uv is not available after installation"
+    exit 1
 fi
+
+# Set up SDK environment for virtual environment creation if available
+export ORIGINAL_PYTHONPATH="${PYTHONPATH:-}"
+export ORIGINAL_LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
+
+if [ -d "/opt/distiller-cm5-sdk" ]; then
+    export PYTHONPATH="/opt/distiller-cm5-sdk:/opt/distiller-cm5-sdk/src:${PYTHONPATH:-}"
+    if [ -d "/opt/distiller-cm5-sdk/lib" ]; then
+        export LD_LIBRARY_PATH="/opt/distiller-cm5-sdk/lib:${LD_LIBRARY_PATH:-}"
+    fi
+fi
+
+# Create main hub virtual environment with Python 3.11
+HUB_VENV_PATH="/opt/distiller-mcp-hub/.venv"
+rm -rf "$HUB_VENV_PATH" 2>/dev/null || true
+cd /opt/distiller-mcp-hub
+"$UV_BINARY" venv "$HUB_VENV_PATH" --python python3.11 --system-site-packages >/dev/null 2>&1
 
 # Set ownership of virtual environment
-chown -R distiller:distiller "$VENV_PATH"
+chown -R distiller:distiller "$HUB_VENV_PATH"
 
-# Install Python packages
-echo "Installing Python packages..."
-if [ -n "$UV_BINARY" ]; then
-    echo "Using uv for package installation..."
-    cd /opt/distiller-mcp-hub && "$UV_BINARY" pip install --python ./.venv/bin/python -r requirements.txt
-else
-    echo "Using pip for package installation..."
-    cd /opt/distiller-mcp-hub && ./.venv/bin/pip install --upgrade pip
-    cd /opt/distiller-mcp-hub && ./.venv/bin/pip install -r requirements.txt
-fi
+# Install hub dependencies using uv sync
+cd /opt/distiller-mcp-hub
+"$UV_BINARY" sync >/dev/null 2>&1
 
 # Set proper ownership after installation
-chown -R distiller:distiller "$VENV_PATH"
+chown -R distiller:distiller "$HUB_VENV_PATH"
+[ -f "/opt/distiller-mcp-hub/uv.lock" ] && chown distiller:distiller "/opt/distiller-mcp-hub/uv.lock" || true
 
-# Verify installation
-echo "Verifying package installation..."
-VENV_PYTHON="/opt/distiller-mcp-hub/.venv/bin/python"
-if [ -f "$VENV_PYTHON" ] && cd /opt/distiller-mcp-hub && "$VENV_PYTHON" -c "import sys" >/dev/null 2>&1; then
-    echo "Virtual environment is working"
-    
-    # Check key packages
-    for pkg in sounddevice picamera2 mcp fastapi uvicorn; do
-        if cd /opt/distiller-mcp-hub && "$VENV_PYTHON" -c "import $pkg" >/dev/null 2>&1; then
-            echo "$pkg is available"
-        else
-            echo "$pkg is not available"
-        fi
-    done
-else
-    echo "Virtual environment setup failed"
+# Create per-project virtual environments
+for project in camera-mcp mic-mcp speaker-mcp; do
+    PROJECT_VENV_PATH="/opt/distiller-mcp-hub/projects/$project/.venv"
+    rm -rf "$PROJECT_VENV_PATH" 2>/dev/null || true
+    cd "/opt/distiller-mcp-hub/projects/$project"
+    "$UV_BINARY" venv "$PROJECT_VENV_PATH" --python python3.11 --system-site-packages >/dev/null 2>&1
+    "$UV_BINARY" sync >/dev/null 2>&1
+    chown -R distiller:distiller "$PROJECT_VENV_PATH"
+    [ -f "/opt/distiller-mcp-hub/projects/$project/uv.lock" ] && chown distiller:distiller "/opt/distiller-mcp-hub/projects/$project/uv.lock" || true
+done
+
+# Restore original environment variables
+export PYTHONPATH="$ORIGINAL_PYTHONPATH"
+export LD_LIBRARY_PATH="$ORIGINAL_LD_LIBRARY_PATH"
+
+# Verify installations
+HUB_PYTHON="/opt/distiller-mcp-hub/.venv/bin/python"
+if [ ! -f "$HUB_PYTHON" ]; then
+    echo "Error: Hub virtual environment setup failed"
+    exit 1
 fi
 
-# Display package manager info
-if [ -n "$UV_BINARY" ]; then
-    echo "Using uv for package management"
-else
-    echo "Using pip for package management"
+for project in camera-mcp mic-mcp speaker-mcp; do
+    PROJECT_PYTHON="/opt/distiller-mcp-hub/projects/$project/.venv/bin/python"
+    if [ ! -f "$PROJECT_PYTHON" ]; then
+        echo "Error: $project virtual environment setup failed"
+        exit 1
+    fi
+done
+
+# Test SDK imports if available (silent)
+if [ -d "/opt/distiller-cm5-sdk" ]; then
+    cd /opt/distiller-mcp-hub/projects/mic-mcp
+    PROJECT_PYTHON="/opt/distiller-mcp-hub/projects/mic-mcp/.venv/bin/python"
+    "$PROJECT_PYTHON" -c "from sdk_imports import import_parakeet" >/dev/null 2>&1 || true
+    
+    cd /opt/distiller-mcp-hub/projects/speaker-mcp
+    PROJECT_PYTHON="/opt/distiller-mcp-hub/projects/speaker-mcp/.venv/bin/python"
+    "$PROJECT_PYTHON" -c "from sdk_imports import import_piper" >/dev/null 2>&1 || true
 fi
 
 # Reload systemd and enable service
@@ -111,20 +146,19 @@ systemctl daemon-reload
 # Installation complete message
 if [ "$1" = "configure" ]; then
     if [ -z "$2" ] || dpkg --compare-versions "$2" ge "0.1.0"; then
+        echo "Distiller MCP Hub installed successfully!"
         echo ""
-        echo "Distiller MCP Hub has been installed successfully!"
+        echo "To manage the service:"
+        echo "  manage_mcp_service.sh {start|stop|restart|status|logs}"
         echo ""
-        echo "To enable the service at boot time, run:"
-        echo "  sudo systemctl enable mcp.service"
-        echo ""
-        echo "To start the service now, run:"
-        echo "  sudo systemctl start mcp.service"
-        echo ""
-        echo "To manage the service, use:"
-        echo "  distiller-mcp-manage {start|stop|restart|status|logs}"
-        echo ""
-        echo "Configuration file: /opt/distiller-mcp-hub/mcp_config.json"
+        echo "Configuration: /opt/distiller-mcp-hub/mcp_config.json"
         echo "Logs: sudo journalctl -u mcp.service"
+        echo ""
+        if [ -d "/opt/distiller-cm5-sdk" ]; then
+            echo "Hardware functionality enabled (distiller-cm5-sdk detected)"
+        else
+            echo "Install distiller-cm5-sdk package for full hardware functionality"
+        fi
     fi
 fi
 

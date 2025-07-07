@@ -1,4 +1,4 @@
-*.py opt/distiller-mcp-hub/
+run_all_mcps.py opt/distiller-mcp-hub/
 projects/ opt/distiller-mcp-hub/
 requirements.txt opt/distiller-mcp-hub/
 pyproject.toml opt/distiller-mcp-hub/

@@ -13,6 +13,11 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "mcp[cli]>=1.1.2",
+    "sherpa-onnx>=1.12.4",
+    "sounddevice>=0.5.2",
+    "soundfile>=0.13.1",
+    "pyaudio>=0.2.14",
+    "numpy>=1.24.0",
 ]
 [[project.authors]]
 name = "Distiller"
@@ -29,9 +34,12 @@ dev = [
 [project.scripts]
 distiller-cm5-mic-mcp = "server:main"
 
+[tool.uv.sources]
+distiller-mcp-hub = { path = "../../", editable = true }
+
 [tool.black]
 line-length = 88
-target-version = ['py39']
+target-version = ['py311']
 
 [tool.isort]
 profile = "black"
